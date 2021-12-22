@@ -1,0 +1,50 @@
+{
+  "name": "@hexlet/code",
+  "version": "1.0.0",
+  "description": "[![Actions Status](https://github.com/VimLoko/backend-project-lvl3/workflows/hexlet-check/badge.svg)](https://github.com/VimLoko/backend-project-lvl3/actions)",
+  "main": "./src/index.js",
+  "scripts": {
+    "test": "npx jest --bail"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=16"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {
+      "^.+\\.[t|j]sx?$": "babel-jest"
+    }
+  },
+  "bin": {
+    "page-loader": "bin/page-loader.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VimLoko/backend-project-lvl3.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VimLoko/backend-project-lvl3/issues"
+  },
+  "homepage": "https://github.com/VimLoko/backend-project-lvl3#readme",
+  "devDependencies": {
+    "@babel/plugin-transform-runtime": "^7.16.5",
+    "@babel/eslint-parser": "^7.15.4",
+    "@babel/preset-env": "^7.16.5",
+    "@jest/globals": "^26.6.2",
+    "eslint": "^7.13.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-babel": "^5.3.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.1.1",
+    "jest": "^26.6.3",
+    "jest-cli": "^26.6.3",
+    "nock": "^13.2.1"
+  },
+  "dependencies": {
+    "axios": "^0.24.0",
+    "commander": "^8.3.0"
+  }
+}
