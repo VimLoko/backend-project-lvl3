@@ -5,3 +5,5 @@
 
 ##Download page and show save path
 [![asciicast](https://asciinema.org/a/utRzcpCoCYxI0CV6fiHMvhroW.svg)](https://asciinema.org/a/utRzcpCoCYxI0CV6fiHMvhroW)
+##Download page with images
+[![asciicast](https://asciinema.org/a/ES9gdoNX8ZQeYXKXI772CHuiI.svg)](https://asciinema.org/a/ES9gdoNX8ZQeYXKXI772CHuiI)

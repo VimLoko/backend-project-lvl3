@@ -6,8 +6,8 @@ export default {
     timeoutErrorMessage: 'Ошибка сети',
   }),
 
-  get(url) {
-    return this.instanse.get(url).catch((e) => {
+  get(url, config = {}) {
+    return this.instanse.get(url, config).catch((e) => {
       throw new Error(e);
     });
   },
