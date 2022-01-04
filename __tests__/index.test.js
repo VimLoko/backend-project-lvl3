@@ -13,6 +13,9 @@ const pathname = '/courses';
 let tempFolder = '';
 const assets = [
   { pathname: '/assets/professions/nodejs.png', file: 'nodejs.png', contentType: 'image/png' },
+  { pathname: '/assets/application.css', file: 'application.css', contentType: 'text/css' },
+  { pathname: '/packs/js/runtime.js', file: 'runtime.js', contentType: 'text/javascript' },
+  { pathname: '/courses', file: 'courses.html', contentType: 'text/html' },
 ];
 beforeEach(async () => {
   tempFolder = await mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
@@ -31,9 +34,13 @@ test('check load HTML-page data', async () => {
 });
 
 test('check load HTML-page data and assets', async () => {
+  const folderAssets = `${tempFolder}/ru-hexlet-io-courses_files/`;
   const response = await readFile(getFullPath('ru-hexlet-io-courses-with-assets.html'), 'utf-8');
   const expectedHtml = await readFile(getFullPath('ru-hexlet-io-courses-with-assets-expected.html'), 'utf-8');
   const expectedImg = await readFile(getFullPath('nodejs.png'), 'utf-8');
+  const expectedCss = await readFile(getFullPath('application.css'), 'utf-8');
+  const expectedLinkHtml = await readFile(getFullPath('courses.html'), 'utf-8');
+  const expectedJs = await readFile(getFullPath('runtime.js'), 'utf-8');
   nock(baseUrl)
     .get(pathname)
     .reply(200, response);
@@ -46,7 +53,17 @@ test('check load HTML-page data and assets', async () => {
   });
   const filePath = await pageLoader(`${baseUrl}${pathname}`, tempFolder);
   const responseSavedFile = await readFile(filePath, 'utf-8');
-  const imgSave = await readFile(`${tempFolder}/ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png`, 'utf-8');
+  const img = await readFile(`${folderAssets}ru-hexlet-io-assets-professions-nodejs.png`, 'utf-8');
+  const css = await readFile(`${folderAssets}ru-hexlet-io-assets-application.css`, 'utf-8');
+  const js = await readFile(`${folderAssets}ru-hexlet-io-packs-js-runtime.js`, 'utf-8');
+  const html = await readFile(`${folderAssets}ru-hexlet-io-courses.html`, 'utf-8');
   expect(responseSavedFile).toBe(expectedHtml);
-  expect(imgSave).toBe(expectedImg);
+  expect(img).toBe(expectedImg);
+  expect(css).toBe(expectedCss);
+  expect(js).toBe(expectedJs);
+  expect(html).toBe(expectedLinkHtml);
 });
+// nock.enableNetConnect();
+// afterAll(() => {
+//   nock.cleanAll();
+// });
