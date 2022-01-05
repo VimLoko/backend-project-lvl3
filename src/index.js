@@ -2,6 +2,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import * as cheerio from 'cheerio';
 import debug from 'debug';
+import Listr from 'listr';
 import requester from './requester.js';
 
 const log = debug('page-loader');
@@ -124,23 +125,20 @@ export default (pageUrl, folder = '') => {
       const replacedHtml = replaceLinksInHTML(data.html, data.links, data.arHTMLPath);
       return { ...data, replacedHtml };
     })
-    // .then((data) => {
-    //   if (data.links.length > 0) {
-    //     log('Create assets folder %o', folderPath);
-    //     return createAssetsFolder(folderPath).then(() => data);
-    //   }
-    //   return data;
-    // })
     .then((data) => {
       log('save %o', filePath);
       return saveFile(filePath, data.replacedHtml).then(() => data);
     })
     .then(({ absoluteLinks, arSavePath }) => {
       log('Preparing to download assets');
+      const tasks = [];
       absoluteLinks.forEach((link, i) => {
-        log('save %o', arSavePath[i]);
-        downloadAssert(link, `${arSavePath[i]}`);
+        tasks.push({
+          title: `save ${link}`,
+          task: () => downloadAssert(link, `${arSavePath[i]}`),
+        });
       });
+      return new Listr(tasks, { concurrent: true, exitOnError: false }).run();
     })
     .then(() => filePath)
     .catch((error) => {

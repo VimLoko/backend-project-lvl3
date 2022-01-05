@@ -13,3 +13,5 @@
 [![asciicast](https://asciinema.org/a/CIILkTUv5gydLsZjNpr1Wsexa.svg)](https://asciinema.org/a/CIILkTUv5gydLsZjNpr1Wsexa)
 ### Error
 [![asciicast](https://asciinema.org/a/WYQJZA8kpZFSpYryJnyM0Ma9Y.svg)](https://asciinema.org/a/WYQJZA8kpZFSpYryJnyM0Ma9Y)
+### Download process
+[![asciicast](https://asciinema.org/a/MNg5asDAQugGAuVJTvrYqmL8y.svg)](https://asciinema.org/a/MNg5asDAQugGAuVJTvrYqmL8y)
