@@ -142,6 +142,6 @@ export default (pageUrl, folder = '') => {
     })
     .then(() => filePath)
     .catch((error) => {
-      throw new Error(error);
+      throw error;
     });
 };
