@@ -1,7 +1,10 @@
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import * as cheerio from 'cheerio';
+import debug from 'debug';
 import requester from './requester.js';
+
+const log = debug('page-loader');
 
 const parseUrl = (url) => new URL(url);
 const parsePath = (pathName) => path.parse(pathName);
@@ -36,23 +39,6 @@ const generateFileName = (name, ext) => {
 };
 
 const generateFolderName = (name) => `${name}_files`;
-
-// const findAllResource = (html, pageUrl) => {
-//   const $ = cheerio.load(html);
-//   const linkObjects = $('img');
-//   const folderName = generateNameFromUrl(pageUrl, generateFolderName);
-//   const { origin } = parseUrl(pageUrl);
-//   const links = [];
-//   const savePaths = [];
-//   linkObjects.each((index, element) => {
-//     const src = $(element).attr('src');
-//     const savePath = generateNameFromUrl(`${origin}${src}`, generateFileName);
-//     links.push(`${origin}${src}`);
-//     savePaths.push(generatePath(folderName, savePath));
-//     $(element).attr('src', generatePath(folderName, savePath));
-//   });
-//   return { html: $.root().html(), links, savePaths };
-// };
 
 const isUrl = (urlStr) => {
   try {
@@ -105,49 +91,51 @@ const replaceLinksInHTML = (html, searchLinks, replaceLinks) => {
   return htmlStr;
 };
 
-// const findAllResource = (html, pageUrl) => {
-//   const $ = cheerio.load(html);
-//   const linkObjects = $('img');
-//   const folderName = generateNameFromUrl(pageUrl, generateFolderName);
-//   const { origin } = parseUrl(pageUrl);
-//   const links = [];
-//   const savePaths = [];
-//   linkObjects.each((index, element) => {
-//     const src = $(element).attr('src');
-//     const savePath = generateNameFromUrl(`${origin}${src}`, generateFileName);
-//     links.push(`${origin}${src}`);
-//     savePaths.push(generatePath(folderName, savePath));
-//     $(element).attr('src', generatePath(folderName, savePath));
-//   });
-//   return { html: $.root().html(), links, savePaths };
-// };
-
 export default (pageUrl, folder = '') => {
+  log('run page-loader');
   const { origin } = parseUrl(pageUrl);
   const fileName = generateNameFromUrl(pageUrl, generateFileName);
   const folderName = generateNameFromUrl(pageUrl, generateFolderName);
   const filePath = generatePath(folder, fileName);
   const folderPath = generatePath(folder, folderName);
+  log('start request');
   return requester.get(pageUrl)
-    .then((response) => response.data)
+    .then((response) => {
+      log('response is received');
+      return response.data;
+    })
     .then((data) => {
+      log('get all assets links from page');
       const { links, absoluteLinks } = getPageResourceLinks(data, origin, resource);
       return { html: data, links, absoluteLinks };
     })
     .then((data) => {
+      log('generate paths for save assets and for replace links in saved local page');
       const arSavePath = createFilesPath(folderPath, data.absoluteLinks);
       const arHTMLPath = createFilesPath(folderName, data.absoluteLinks);
       return { ...data, arSavePath, arHTMLPath };
     })
     .then((data) => {
+      log('replace links in saved local page');
       const replacedHtml = replaceLinksInHTML(data.html, data.links, data.arHTMLPath);
       return { ...data, replacedHtml };
     })
-    .then((data) => (data.links.length > 0
-      ? createAssetsFolder(folderPath).then(() => data)
-      : data))
-    .then((data) => saveFile(filePath, data.replacedHtml).then(() => data))
-    .then(({ absoluteLinks, arSavePath }) => absoluteLinks
-      .map((img, i) => downloadAssert(img, `${arSavePath[i]}`)))
+    .then((data) => {
+      if (data.links.length > 0) {
+        log('Create assets folder %o', folderPath);
+        return createAssetsFolder(folderPath).then(() => data);
+      }
+      return data;
+    })
+    .then((data) => {
+      log('save %o', filePath);
+      return saveFile(filePath, data.replacedHtml).then(() => data);
+    })
+    .then(({ absoluteLinks, arSavePath }) => {
+      absoluteLinks.forEach((link, i) => {
+        log('save %o', arSavePath[i]);
+        downloadAssert(link, `${arSavePath[i]}`);
+      });
+    })
     .then(() => filePath);
 };

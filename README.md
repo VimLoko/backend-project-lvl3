@@ -9,3 +9,5 @@
 [![asciicast](https://asciinema.org/a/ES9gdoNX8ZQeYXKXI772CHuiI.svg)](https://asciinema.org/a/ES9gdoNX8ZQeYXKXI772CHuiI)
 ### Download page with all resourses
 [![asciicast](https://asciinema.org/a/Pm7Tt5L7uSw9UQn6U3e2M5ClL.svg)](https://asciinema.org/a/Pm7Tt5L7uSw9UQn6U3e2M5ClL)
+### DEBUG
+[![asciicast](https://asciinema.org/a/CIILkTUv5gydLsZjNpr1Wsexa.svg)](https://asciinema.org/a/CIILkTUv5gydLsZjNpr1Wsexa)

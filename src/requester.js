@@ -1,4 +1,5 @@
 import axios from 'axios';
+import 'axios-debug-log';
 
 export default {
   instanse: axios.create({
