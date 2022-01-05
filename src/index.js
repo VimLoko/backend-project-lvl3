@@ -93,7 +93,6 @@ const replaceLinksInHTML = (html, searchLinks, replaceLinks) => {
 
 export default (pageUrl, folder = '') => {
   log('run page-loader');
-  const { origin } = parseUrl(pageUrl);
   const fileName = generateNameFromUrl(pageUrl, generateFileName);
   const folderName = generateNameFromUrl(pageUrl, generateFolderName);
   const filePath = generatePath(folder, fileName);
@@ -105,7 +104,12 @@ export default (pageUrl, folder = '') => {
       return response.data;
     })
     .then((data) => {
+      log('Create assets folder %o', folderPath);
+      return createAssetsFolder(folderPath).then(() => data);
+    })
+    .then((data) => {
       log('get all assets links from page');
+      const { origin } = parseUrl(pageUrl);
       const { links, absoluteLinks } = getPageResourceLinks(data, origin, resource);
       return { html: data, links, absoluteLinks };
     })
@@ -120,22 +124,26 @@ export default (pageUrl, folder = '') => {
       const replacedHtml = replaceLinksInHTML(data.html, data.links, data.arHTMLPath);
       return { ...data, replacedHtml };
     })
-    .then((data) => {
-      if (data.links.length > 0) {
-        log('Create assets folder %o', folderPath);
-        return createAssetsFolder(folderPath).then(() => data);
-      }
-      return data;
-    })
+    // .then((data) => {
+    //   if (data.links.length > 0) {
+    //     log('Create assets folder %o', folderPath);
+    //     return createAssetsFolder(folderPath).then(() => data);
+    //   }
+    //   return data;
+    // })
     .then((data) => {
       log('save %o', filePath);
       return saveFile(filePath, data.replacedHtml).then(() => data);
     })
     .then(({ absoluteLinks, arSavePath }) => {
+      log('Preparing to download assets');
       absoluteLinks.forEach((link, i) => {
         log('save %o', arSavePath[i]);
         downloadAssert(link, `${arSavePath[i]}`);
       });
     })
-    .then(() => filePath);
+    .then(() => filePath)
+    .catch((error) => {
+      throw new Error(error.message);
+    });
 };

@@ -19,21 +19,33 @@ const assets = [
 ];
 beforeEach(async () => {
   tempFolder = await mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
-});
-
-test('check load HTML-page data', async () => {
-  const response = await readFile(getFullPath('ru-hexlet-io-courses-without-assets.html'), 'utf-8');
-  const expected = await readFile(getFullPath('ru-hexlet-io-courses-without-assets-expected.html'), 'utf-8');
+  const response = await readFile(getFullPath('ru-hexlet-io-courses-with-assets.html'), 'utf-8');
   nock(baseUrl)
     .get(pathname)
     .reply(200, response);
+  assets.forEach((asset) => {
+    nock(baseUrl)
+      .get(asset.pathname)
+      .replyWithFile(200, getFullPath(asset.file), {
+        'Content-Type': asset.contentType,
+      });
+  });
+});
 
+test('check load HTML-page data', async () => {
+  nock.cleanAll();
+  const expected = await readFile(getFullPath('ru-hexlet-io-courses-without-assets-expected.html'), 'utf-8');
+  const response = await readFile(getFullPath('ru-hexlet-io-courses-without-assets.html'), 'utf-8');
+  nock(baseUrl)
+    .get(pathname)
+    .reply(200, response);
   const filePath = await pageLoader(`${baseUrl}${pathname}`, tempFolder);
   const responseSavedFile = await readFile(filePath, 'utf-8');
-  expect(responseSavedFile).toBe(expected);
+  await expect(responseSavedFile).toBe(expected);
 });
 
 test('check load HTML-page data and assets', async () => {
+  nock.cleanAll();
   const folderAssets = `${tempFolder}/ru-hexlet-io-courses_files/`;
   const response = await readFile(getFullPath('ru-hexlet-io-courses-with-assets.html'), 'utf-8');
   const expectedHtml = await readFile(getFullPath('ru-hexlet-io-courses-with-assets-expected.html'), 'utf-8');
@@ -63,7 +75,87 @@ test('check load HTML-page data and assets', async () => {
   expect(js).toBe(expectedJs);
   expect(html).toBe(expectedLinkHtml);
 });
-// nock.enableNetConnect();
-// afterAll(() => {
-//   nock.cleanAll();
-// });
+
+test('Access denied', async () => {
+  const pL = pageLoader(`${baseUrl}${pathname}`, '/sys');
+
+  await expect(pL).rejects.toThrowError(/EACCES/);
+});
+
+test('Throw error if folder not isset', async () => {
+  const wrongTempDirPath = path.join(tempFolder, '/asdfdasdasdasd');
+
+  await expect(async () => {
+    await pageLoader(`${baseUrl}${pathname}`, wrongTempDirPath);
+  }).rejects.toThrowError(/ENOENT/);
+});
+
+test('Throw if folder exist', async () => {
+  nock.cleanAll();
+  const response = await readFile(getFullPath('ru-hexlet-io-courses-with-assets.html'), 'utf-8');
+  nock(baseUrl)
+    .get(pathname)
+    .twice()
+    .reply(200, response);
+  assets.forEach((asset) => {
+    nock(baseUrl)
+      .get(asset.pathname)
+      .twice()
+      .replyWithFile(200, getFullPath(asset.file), {
+        'Content-Type': asset.contentType,
+      });
+  });
+  await pageLoader(`${baseUrl}${pathname}`, tempFolder);
+  await expect(async () => {
+    await pageLoader(`${baseUrl}${pathname}`, tempFolder);
+  }).rejects.toThrowError(/EEXIST/);
+});
+
+test('Throw timeout error', async () => {
+  nock.cleanAll();
+  nock(baseUrl)
+    .get(pathname)
+    .replyWithError('ETIMEDOUT error');
+
+  await expect(async () => {
+    await pageLoader(`${baseUrl}${pathname}`, tempFolder);
+  }).rejects.toThrowError(/ETIMEDOUT/);
+});
+
+test('return 404 code', async () => {
+  nock.cleanAll();
+  nock(baseUrl)
+    .get(pathname)
+    .reply(404);
+
+  await expect(async () => {
+    await pageLoader(`${baseUrl}${pathname}`, tempFolder);
+  }).rejects.toThrowError(/404/);
+});
+
+test('return 500 code', async () => {
+  nock.cleanAll();
+  nock(baseUrl)
+    .get(pathname)
+    .reply(500);
+
+  await expect(async () => {
+    await pageLoader(`${baseUrl}${pathname}`, tempFolder);
+  }).rejects.toThrowError(/500/);
+});
+
+test('getaddrinfo error', async () => {
+  nock.cleanAll();
+  nock(baseUrl)
+    .get(pathname)
+    .replyWithError('getaddrinfo ENOTFOUND');
+
+  await expect(async () => {
+    await pageLoader(`${baseUrl}${pathname}`, tempFolder);
+  }).rejects.toThrowError(/ENOTFOUND/);
+});
+
+afterAll(() => {
+  nock.cleanAll();
+  nock.enableNetConnect();
+});
