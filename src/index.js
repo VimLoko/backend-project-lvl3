@@ -12,7 +12,7 @@ const parsePath = (pathName) => path.parse(pathName);
 const generatePath = (folder, fileName) => path.join(folder, fileName);
 const createAssetsFolder = (folderPath) => mkdir(folderPath);
 const saveFile = (filePath, data) => writeFile(filePath, data, 'utf-8');
-const downloadAssert = (pageUrl, pathToSave) => requester.get(pageUrl, { responseType: 'stream' })
+const downloadAssert = (pageUrl, pathToSave) => requester.get(pageUrl, { responseType: 'arraybuffer' })
   .then((response) => writeFile(pathToSave, response.data, 'utf-8'));
 
 const resource = {
