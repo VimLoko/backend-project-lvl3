@@ -17,6 +17,7 @@ const assets = [
   { pathname: '/packs/js/runtime.js', file: 'runtime.js', contentType: 'text/javascript' },
   { pathname: '/courses', file: 'courses.html', contentType: 'text/html' },
 ];
+
 beforeEach(async () => {
   tempFolder = await mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
   const response = await readFile(getFullPath('ru-hexlet-io-courses-with-assets.html'), 'utf-8');

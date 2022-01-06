@@ -138,7 +138,7 @@ export default (pageUrl, folder = '') => {
           task: () => downloadAssert(link, `${arSavePath[i]}`),
         });
       });
-      return new Listr(tasks, { concurrent: true, exitOnError: false }).run();
+      return new Listr(tasks, { concurrent: true }).run();
     })
     .then(() => filePath)
     .catch((error) => {
